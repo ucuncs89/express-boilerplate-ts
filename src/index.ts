@@ -5,15 +5,13 @@ import helmet from "helmet";
 import morgan from "morgan";
 dotenv.config({ path: ".env" });
 
-// Import routes
-import authRoutes from "./http/auth/auth.routes";
-import userRoutes from "./http/user/user.routes";
-import packageRoutes from "./http/package/package.routes";
-
 // Import middleware
 import { errorHandlerMiddleware } from "./middlewares/errorMiddleware";
 import { errorResponse } from "./utils/responseHelper";
 import { globalSingleflightMiddleware } from "./middlewares/globalSingleflight";
+import { registerRoutes, getRoutesAsJson } from "./utils/autoRouter";
+import path from "path";
+import fs from "fs";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -39,34 +37,39 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "UP", timestamp: new Date().toISOString() });
 });
 
-// API Routes
-const apiRouter = express.Router();
-app.use("/api", apiRouter);
-
-// Debug middleware for API routes
-apiRouter.use((req, res, next) => {
-  console.log(
-    `[DEBUG API] ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`
-  );
-  next();
+// Register all routes automatically
+const routes = registerRoutes(app, path.join(__dirname, "http"), {
+  verbose: true,
+  baseApiPath: "/api",
+  excludeDirs: ["node_modules", "dist", ".git"],
 });
 
-// Mount routes on API router
-apiRouter.use("/auth", authRoutes);
-apiRouter.use("/users", userRoutes);
-apiRouter.use("/packages", packageRoutes);
+// Save routes to JSON file
+const routesDir = path.join(process.cwd(), "routes");
+if (!fs.existsSync(routesDir)) {
+  fs.mkdirSync(routesDir);
+}
+fs.writeFileSync(path.join(routesDir, "routes.json"), getRoutesAsJson(routes));
 
 // API welcome route
-apiRouter.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.json({
     message: "Welcome to the Logistics API",
     version: "1.0.0",
     documentation: "/api-docs",
-    endpoints: {
-      auth: "/api/auth",
-      users: "/api/users",
-      packages: "/api/packages",
-    },
+  });
+});
+
+// Add a route to view all available routes
+app.get("/api/routes", (req, res) => {
+  res.json({
+    total: routes.length,
+    routes: routes.map((route) => ({
+      path: route.fullPath,
+      method: route.method,
+      protected: route.protected,
+      description: route.description || "",
+    })),
   });
 });
 
@@ -93,6 +96,7 @@ const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
   console.log(`API documentation available at: http://localhost:${port}/api`);
   console.log(`Health check available at: http://localhost:${port}/health`);
-
-  // Export routes after all routes are mounted and server is started
+  console.log(
+    `All API routes available at: http://localhost:${port}/api/routes`
+  );
 });
