@@ -1,0 +1,42 @@
+{
+  "name": "be-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "migrate": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js migrate:latest --knexfile src/config/knexfile.ts",
+    "migrate:rollback": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js migrate:rollback --knexfile src/config/knexfile.ts",
+    "migrate:make": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js migrate:make --knexfile src/config/knexfile.ts",
+    "seed": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js seed:run --knexfile src/config/knexfile.ts",
+    "seed:make": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js seed:make --knexfile src/config/knexfile.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-validator": "^7.0.1",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.14.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.15.17",
+    "cross-env": "^7.0.3",
+    "knex": "^3.1.0",
+    "tsx": "^4.19.4"
+  }
+}
