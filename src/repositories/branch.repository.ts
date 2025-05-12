@@ -1,4 +1,4 @@
-import BaseRepository from "../lib/BaseRepository";
+import BaseRepository from "../lib/base.respository";
 import { Branch } from "../lib/interfaces";
 
 export default class BranchRepository extends BaseRepository<Branch> {

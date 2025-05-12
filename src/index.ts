@@ -9,9 +9,9 @@ import logger from "./utils/logger";
 dotenv.config({ path: ".env" });
 
 // Import middleware
-import { errorHandlerMiddleware } from "./middlewares/errorMiddleware";
-import { errorResponse } from "./utils/responseHelper";
-import { globalSingleflightMiddleware } from "./middlewares/globalSingleflight";
+import { errorHandlerMiddleware } from "./middlewares/error.middleware";
+import { errorResponse } from "./utils/response-helper";
+import { globalSingleflightMiddleware } from "./middlewares/global-singleflight.middleware";
 import { registerRoutes, getRoutesAsJson } from "./utils/autoRouter";
 
 const app = express();

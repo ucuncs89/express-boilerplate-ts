@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../../middlewares/auth.middleware";
-import { controller } from "../../utils/requestHandler";
+import { controller } from "../../utils/request-handler";
 import {
   getAllUsers,
   getUserById,

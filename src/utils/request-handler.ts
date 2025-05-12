@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { errorResponse, successResponse } from "./responseHelper";
+import { errorResponse, successResponse } from "./response-helper";
 import { ValidationError } from "./errors";
 
 /**

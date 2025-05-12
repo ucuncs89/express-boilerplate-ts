@@ -1,7 +1,7 @@
-import UserRepository from "./UserRepository";
-import RoleRepository from "./RoleRepository";
-import BranchRepository from "./BranchRepository";
-import PackageRepository from "./PackageRepository";
+import UserRepository from "./user.repository";
+import RoleRepository from "./role.repository";
+import BranchRepository from "./branch.repository";
+import PackageRepository from "./package.repository";
 
 // Export interfaces
 export * from "../lib/interfaces";

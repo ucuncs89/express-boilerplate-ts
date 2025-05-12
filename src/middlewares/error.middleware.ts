@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { errorResponse } from "../utils/responseHelper";
+import { errorResponse } from "../utils/response-helper";
 import { AppError } from "../utils/errors";
 import logger from "../utils/logger";
 

@@ -1,4 +1,4 @@
-import BaseRepository from "../lib/BaseRepository";
+import BaseRepository from "../lib/base.respository";
 import { Package } from "../lib/interfaces";
 import { NotFoundError } from "../utils/errors";
 
