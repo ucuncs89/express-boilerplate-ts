@@ -1,98 +1,183 @@
+import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
+import path from "path";
 import config from "../config";
+import { inspect } from "util";
+import fs from "fs";
 
-type LogLevel = "error" | "warn" | "info" | "debug";
-
-// Set colors for different log levels
-const colors = {
-  error: "\x1b[31m", // Red
-  warn: "\x1b[33m", // Yellow
-  info: "\x1b[36m", // Cyan
-  debug: "\x1b[34m", // Blue
-  reset: "\x1b[0m", // Reset color
+// Define custom log levels
+const levels = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  debug: 4,
 };
 
+// Define colors for each level
+const colors = {
+  error: "red",
+  warn: "yellow",
+  info: "cyan",
+  http: "green",
+  debug: "blue",
+};
+
+// Add colors to winston
+winston.addColors(colors);
+
+// Custom format that handles errors
+const formatError = winston.format((info) => {
+  if (info.message instanceof Error) {
+    info.message = info.message.stack || info.message.message;
+  }
+  return info;
+});
+
+// Create custom format for console output with colors
+const consoleFormat = winston.format.combine(
+  formatError(),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+  winston.format.colorize({ all: config.logging.colorize }),
+  winston.format.printf((info) => {
+    const { timestamp, level, message, ...meta } = info;
+
+    let metaStr = "";
+
+    // Format additional metadata excluding splat (winston internal)
+    if (Object.keys(meta).length > 0) {
+      if (meta.splat === undefined) {
+        metaStr =
+          "\n" + inspect(meta, { colors: config.logging.colorize, depth: 5 });
+      } else if (Array.isArray(meta.splat) && meta.splat.length > 0) {
+        metaStr =
+          "\n" +
+          inspect(meta.splat, { colors: config.logging.colorize, depth: 5 });
+      }
+    }
+
+    return `[${timestamp}] [${level}]: ${message}${metaStr}`;
+  })
+);
+
+// Create custom format for file output (no colors, but JSON)
+const fileFormat = winston.format.combine(
+  formatError(),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss:ms" }),
+  winston.format.json()
+);
+
+// Define transports
+const transports: winston.transport[] = [
+  // Console transport
+  new winston.transports.Console({
+    format: consoleFormat,
+    level: config.app.env === "production" ? "info" : config.logging.level,
+  }),
+];
+
+// Add file transports in production or if explicitly configured
+if (config.app.env === "production" || config.logging.toFile) {
+  // Create logs directory if it doesn't exist
+  const logsDir = path.join(process.cwd(), config.logging.directory);
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+
+  // Add daily rotate file transport for all logs
+  const dailyRotateFile = new winston.transports.DailyRotateFile({
+    dirname: logsDir,
+    filename: "application-%DATE%.log",
+    datePattern: "YYYY-MM-DD",
+    maxSize: config.logging.maxSize,
+    maxFiles: config.logging.maxFiles,
+    format: fileFormat,
+    level: config.logging.level,
+  });
+
+  transports.push(dailyRotateFile);
+
+  // Add daily rotate file transport for error logs
+  const errorRotateFile = new winston.transports.DailyRotateFile({
+    dirname: logsDir,
+    filename: "error-%DATE%.log",
+    datePattern: "YYYY-MM-DD",
+    maxSize: config.logging.maxSize,
+    maxFiles: config.logging.maxFiles,
+    format: fileFormat,
+    level: "error",
+  });
+
+  transports.push(errorRotateFile);
+}
+
+// Create the logger
+const logger = winston.createLogger({
+  level: config.logging.level,
+  levels,
+  transports,
+  exitOnError: false,
+});
+
 /**
- * Simple logger utility that wraps console methods
- * Can be easily replaced with a more robust logger like winston later
+ * Enhanced logger that handles various data types more intelligently
  */
 class Logger {
-  private level: LogLevel;
-  private isDevelopment: boolean;
-
-  constructor() {
-    this.level = (config.logging.level as LogLevel) || "info";
-    this.isDevelopment = config.app.env === "development";
-  }
-
   /**
-   * Check if the given log level should be logged based on the configured level
+   * Log error messages with stack trace support
    */
-  private shouldLog(level: LogLevel): boolean {
-    const levels: Record<LogLevel, number> = {
-      error: 0,
-      warn: 1,
-      info: 2,
-      debug: 3,
-    };
-
-    return levels[level] <= levels[this.level];
-  }
-
-  /**
-   * Format message with timestamp and level
-   */
-  private formatMessage(level: LogLevel, message: string): string {
-    const timestamp = new Date().toISOString();
-    return `${colors[level]}[${timestamp}] [${level.toUpperCase()}]${
-      colors.reset
-    } ${message}`;
-  }
-
-  /**
-   * Log error messages
-   */
-  error(message: string, ...meta: any[]): void {
-    if (this.shouldLog("error")) {
-      console.error(this.formatMessage("error", message), ...meta);
-    }
+  error(message: any, ...meta: any[]): void {
+    logger.log("error", message, ...meta);
   }
 
   /**
    * Log warning messages
    */
-  warn(message: string, ...meta: any[]): void {
-    if (this.shouldLog("warn")) {
-      console.warn(this.formatMessage("warn", message), ...meta);
-    }
+  warn(message: any, ...meta: any[]): void {
+    logger.log("warn", message, ...meta);
   }
 
   /**
    * Log info messages
    */
-  info(message: string, ...meta: any[]): void {
-    if (this.shouldLog("info")) {
-      console.info(this.formatMessage("info", message), ...meta);
-    }
+  info(message: any, ...meta: any[]): void {
+    logger.log("info", message, ...meta);
   }
 
   /**
    * Log debug messages
    */
-  debug(message: string, ...meta: any[]): void {
-    if (this.shouldLog("debug")) {
-      console.debug(this.formatMessage("debug", message), ...meta);
-    }
+  debug(message: any, ...meta: any[]): void {
+    logger.log("debug", message, ...meta);
   }
 
   /**
    * Log HTTP requests (method, path, status, time)
    */
   http(method: string, path: string, status: number, time: number): void {
-    if (this.shouldLog("info")) {
-      const statusColor = status >= 400 ? colors.error : colors.info;
-      const message = `${method} ${path} ${statusColor}${status}${colors.reset} ${time}ms`;
-      console.info(this.formatMessage("info", message));
+    logger.log("http", `${method} ${path} ${status} ${time}ms`);
+  }
+
+  /**
+   * Log objects (automatically stringify JSON)
+   */
+  object(
+    level: "error" | "warn" | "info" | "debug",
+    obj: any,
+    message?: string
+  ): void {
+    if (message) {
+      logger.log(level, message, obj);
+    } else {
+      logger.log(level, obj);
     }
+  }
+
+  /**
+   * Log errors with full stack trace and details
+   */
+  exception(error: Error, context?: any): void {
+    this.error(error, { context });
   }
 }
 

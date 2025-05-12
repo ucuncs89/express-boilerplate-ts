@@ -33,8 +33,13 @@ const config = {
     methods: process.env.CORS_METHODS || "GET,HEAD,PUT,PATCH,POST,DELETE",
   },
   logging: {
-    level: process.env.LOG_LEVEL || "info",
+    level: process.env.LOG_LEVEL || "info", // error, warn, info, http, debug
     format: process.env.LOG_FORMAT || "dev",
+    toFile: process.env.LOG_TO_FILE === "true",
+    directory: process.env.LOG_DIRECTORY || "logs",
+    maxSize: process.env.LOG_MAX_SIZE || "20m",
+    maxFiles: process.env.LOG_MAX_FILES || "14d",
+    colorize: process.env.LOG_COLORIZE !== "false",
   },
 };
 

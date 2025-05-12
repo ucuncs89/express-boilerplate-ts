@@ -2,7 +2,10 @@ import express from "express";
 import * as dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
-import morgan from "morgan";
+import path from "path";
+import fs from "fs";
+import logger from "./utils/logger";
+
 dotenv.config({ path: ".env" });
 
 // Import middleware
@@ -10,17 +13,28 @@ import { errorHandlerMiddleware } from "./middlewares/errorMiddleware";
 import { errorResponse } from "./utils/responseHelper";
 import { globalSingleflightMiddleware } from "./middlewares/globalSingleflight";
 import { registerRoutes, getRoutesAsJson } from "./utils/autoRouter";
-import path from "path";
-import fs from "fs";
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Debug middleware to log all requests
+// Request logger middleware - logs at start of request
 app.use((req, res, next) => {
-  console.log(
-    `[DEBUG] ${new Date().toISOString()} - ${req.method} ${req.originalUrl}`
-  );
+  const startTime = Date.now();
+
+  // Log when request comes in
+  logger.info(`${req.method} ${req.originalUrl} - Request received`, {
+    method: req.method,
+    url: req.originalUrl,
+    ip: req.ip,
+    userAgent: req.get("user-agent"),
+  });
+
+  // Log when response is sent
+  res.on("finish", () => {
+    const responseTime = Date.now() - startTime;
+    logger.http(req.method, req.originalUrl, res.statusCode, responseTime);
+  });
+
   next();
 });
 
@@ -30,7 +44,6 @@ app.use(helmet()); // Security headers
 app.use(cors()); // CORS handling
 app.use(express.json()); // Parse JSON bodies
 app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
-app.use(morgan("dev")); // Request logging
 
 // Health check endpoint
 app.get("/health", (req, res) => {
@@ -73,13 +86,14 @@ app.get("/api/routes", (req, res) => {
   });
 });
 
-// Debug middleware for 404s
+// Debug middleware for 404s - Log 404 errors
 app.use((req, res, next) => {
-  console.log(
-    `[DEBUG 404] ${new Date().toISOString()} - Route not found: ${req.method} ${
-      req.originalUrl
-    }`
-  );
+  const message = `Route not found: ${req.method} ${req.originalUrl}`;
+  logger.warn(message, {
+    method: req.method,
+    url: req.originalUrl,
+    ip: req.ip,
+  });
   next();
 });
 
@@ -93,10 +107,14 @@ app.use(errorHandlerMiddleware);
 
 // Start the server
 const server = app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-  console.log(`API documentation available at: http://localhost:${port}/api`);
-  console.log(`Health check available at: http://localhost:${port}/health`);
-  console.log(
+  logger.info(`Server is running on port ${port}`, {
+    port,
+    environment: process.env.NODE_ENV || "development",
+    version: process.env.npm_package_version,
+  });
+  logger.info(`API documentation available at: http://localhost:${port}/api`);
+  logger.info(`Health check available at: http://localhost:${port}/health`);
+  logger.info(
     `All API routes available at: http://localhost:${port}/api/routes`
   );
 });

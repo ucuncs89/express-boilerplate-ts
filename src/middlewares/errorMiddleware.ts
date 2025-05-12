@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { errorResponse } from "../utils/responseHelper";
 import { AppError } from "../utils/errors";
+import logger from "../utils/logger";
 
 /**
  * Not found middleware - handles 404 errors for routes that don't exist
@@ -12,6 +13,7 @@ export const notFoundMiddleware = (
 ): void => {
   if (!res.headersSent) {
     const message = `Route not found: ${req.method} ${req.originalUrl}`;
+    logger.warn(message, { path: req.originalUrl, method: req.method });
     errorResponse(res, message, 404);
   }
 };
@@ -30,11 +32,24 @@ export const errorHandlerMiddleware = (
     return next(err);
   }
 
-  // console.error(`[Error Handler] ${req.method} ${req.path}:`, err);
+  const reqInfo = {
+    method: req.method,
+    path: req.path,
+    query: req.query,
+    ip: req.ip,
+    headers: req.headers,
+  };
 
   // If the error is our custom AppError, use its status code
   if (err instanceof AppError) {
     const appError = err as AppError;
+
+    if (appError.statusCode >= 500) {
+      logger.error(err, { ...reqInfo, errors: appError.errors });
+    } else {
+      logger.warn(err, { ...reqInfo, errors: appError.errors });
+    }
+
     errorResponse(
       res,
       appError.message,
@@ -42,7 +57,6 @@ export const errorHandlerMiddleware = (
       process.env.NODE_ENV === "production"
         ? undefined
         : {
-            // stack: appError.stack,
             name: appError.name,
             errors: appError.errors,
           }
@@ -58,6 +72,11 @@ export const errorHandlerMiddleware = (
       err.message.includes("duplicate key value") ||
       err.message.includes("Duplicate entry"))
   ) {
+    logger.warn("Database constraint error", {
+      ...reqInfo,
+      error: err.message,
+    });
+
     errorResponse(
       res,
       "Database constraint error. The record may already exist or have invalid references.",
@@ -65,7 +84,6 @@ export const errorHandlerMiddleware = (
       process.env.NODE_ENV === "production"
         ? undefined
         : {
-            stack: err.stack,
             message: err.message,
           }
     );
@@ -74,6 +92,11 @@ export const errorHandlerMiddleware = (
 
   // Handle validation errors (from express-validator, etc.)
   if (err.name === "ValidationError" || (err as any).errors) {
+    logger.warn("Validation error", {
+      ...reqInfo,
+      errors: (err as any).errors || { message: err.message },
+    });
+
     errorResponse(
       res,
       "Validation failed",
@@ -83,6 +106,9 @@ export const errorHandlerMiddleware = (
     return;
   }
 
+  // Log all 500 errors with full details
+  logger.exception(err, reqInfo);
+
   // Default error handling for unhandled errors
   errorResponse(
     res,
@@ -91,7 +117,6 @@ export const errorHandlerMiddleware = (
     process.env.NODE_ENV === "production"
       ? undefined
       : {
-          stack: err.stack,
           name: err.name,
         }
   );
