@@ -56,7 +56,7 @@ const routes = registerRoutes(app, path.join(__dirname, "http"), {
   baseApiPath: "/api",
   excludeDirs: ["node_modules", "dist", ".git"],
 });
-
+//
 // Save routes to JSON file
 const routesDir = path.join(process.cwd(), "routes");
 if (!fs.existsSync(routesDir)) {
