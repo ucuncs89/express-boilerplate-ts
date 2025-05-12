@@ -12,16 +12,16 @@
     "seed": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js seed:run --knexfile src/config/knexfile.ts",
     "seed:make": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js seed:make --knexfile src/config/knexfile.ts",
     "prepare": "husky",
-    "lint": "eslint --fix \"src/**/*.{ts,tsx}\"",
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint --fix \"src/**/*.ts\"",
     "lint:staged": "lint-staged"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "lint-staged": {
-    "*.{js,ts}": [
-      "pnpm lint",
-      "git add"
+    "*.ts": [
+      "eslint --no-fix"
     ]
   },
   "dependencies": {

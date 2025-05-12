@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Hanya jalankan lint untuk file TypeScript yang berubah
+# Dan tidak memaksa untuk memperbaikinya (--no-fix)
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | grep "\.ts$" || true)
+
+if [ -n "$FILES" ]; then
+  echo "🔍 Menjalankan linter pada file TypeScript yang berubah"
+  pnpm eslint $FILES --no-fix
+fi

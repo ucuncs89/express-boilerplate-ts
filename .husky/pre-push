@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Cek apakah ada kesalahan typescript yang fatal saja
+echo "🔍 Memeriksa error TypeScript tanpa melakukan build penuh..."
+pnpm tsc --noEmit 
