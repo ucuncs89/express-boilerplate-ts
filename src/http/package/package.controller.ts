@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { ControllerFunction } from "../../utils/types";
 import { NotFoundError, ValidationError } from "../../utils/errors";
-import packageService from "../../services/packageService";
+import packageService from "../../services/package.service";
 import { packageRepository } from "../../repositories";
 
 /**
