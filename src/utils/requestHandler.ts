@@ -29,11 +29,18 @@ export const controller = (
     next: NextFunction
   ): Promise<void> => {
     try {
+      console.log(`[Controller] Starting ${req.method} ${req.path}`);
+
       // Execute the controller function and get the result
       const result = await fn(req, res, next);
 
+      console.log(`[Controller] Completed ${req.method} ${req.path}`);
+
       // If headers are already sent (e.g., by streaming response or manual handling), do nothing
       if (res.headersSent) {
+        console.log(
+          `[Controller] Headers already sent for ${req.method} ${req.path}`
+        );
         return;
       }
 
@@ -53,13 +60,35 @@ export const controller = (
         const responseData =
           result?.result !== undefined ? result.result : result;
 
+        console.log(
+          `[Controller] Sending success response for ${req.method} ${req.path} with status ${statusCode}`
+        );
+
         // Send the success response
         successResponse(res, responseData, message, statusCode, pagination);
+      } else {
+        console.log(
+          `[Controller] No response data for ${req.method} ${req.path}`
+        );
       }
       // If no result and headers not sent, assume it was handled manually or needs no response
     } catch (error: any) {
-      // Log the error
-      console.error(`[Controller Error] ${req.method} ${req.path}:`, error);
+      // Log the error with request details
+      console.error(`[Controller Error] ${req.method} ${req.path}:`, {
+        error: error.message,
+        stack: error.stack,
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      });
+
+      // If headers are already sent, pass to next error handler
+      if (res.headersSent) {
+        console.log(
+          `[Controller] Headers already sent in error for ${req.method} ${req.path}`
+        );
+        return next(error);
+      }
 
       // Determine the status code
       const statusCode = error.statusCode || 500;
@@ -69,6 +98,9 @@ export const controller = (
 
       // For validation errors, format them correctly
       if (error instanceof ValidationError || statusCode === 422) {
+        console.log(
+          `[Controller] Sending validation error response for ${req.method} ${req.path}`
+        );
         errorResponse(res, message, statusCode, { errors: error.errors });
         return;
       }
@@ -78,9 +110,13 @@ export const controller = (
         process.env.NODE_ENV === "production"
           ? undefined
           : {
-              // stack: error.stack,
+              stack: error.stack,
               name: error.name,
             };
+
+      console.log(
+        `[Controller] Sending error response for ${req.method} ${req.path} with status ${statusCode}`
+      );
 
       // Send the error response
       errorResponse(res, message, statusCode, errorDetails);

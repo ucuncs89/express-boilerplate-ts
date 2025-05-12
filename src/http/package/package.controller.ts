@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { ControllerFunction } from "../../utils/types";
 import { NotFoundError, ValidationError } from "../../utils/errors";
 import packageService from "../../services/packageService";
@@ -61,7 +61,7 @@ export const trackPackage: ControllerFunction = async (req, res) => {
 export const createPackage: ControllerFunction = async (req, res) => {
   const packageData = req.body;
 
-  // Required fields validation could be done here or in a middleware
+  // Required fields validation
   const requiredFields = [
     "sender_name",
     "receiver_name",

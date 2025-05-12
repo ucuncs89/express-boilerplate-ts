@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import { userRepository, roleRepository } from "../../repositories";
 import {
   NotFoundError,
@@ -61,11 +61,11 @@ export const createUser: ControllerFunction = async (req, res) => {
     });
   }
 
-  // In a real application, you would hash the password before saving
+  // Create user
   const newUser = await userRepository.create({
     name,
     email,
-    password, // In production, this should be hashed
+    password, // Note: In production, this should be hashed
     role_id,
     is_active: true,
   });
