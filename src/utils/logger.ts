@@ -1,4 +1,7 @@
 import winston from "winston";
+// Winston daily rotate file harus diimpor dengan require karena struktur module-nya
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+// const DailyRotateFile = require("winston-daily-rotate-file");
 import DailyRotateFile from "winston-daily-rotate-file";
 import path from "path";
 import config from "../config";
@@ -85,7 +88,7 @@ if (config.app.env === "production" || config.logging.toFile) {
   }
 
   // Add daily rotate file transport for all logs
-  const dailyRotateFile = new winston.transports.DailyRotateFile({
+  const dailyRotateFile = new DailyRotateFile({
     dirname: logsDir,
     filename: "application-%DATE%.log",
     datePattern: "YYYY-MM-DD",
@@ -98,7 +101,7 @@ if (config.app.env === "production" || config.logging.toFile) {
   transports.push(dailyRotateFile);
 
   // Add daily rotate file transport for error logs
-  const errorRotateFile = new winston.transports.DailyRotateFile({
+  const errorRotateFile = new DailyRotateFile({
     dirname: logsDir,
     filename: "error-%DATE%.log",
     datePattern: "YYYY-MM-DD",

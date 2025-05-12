@@ -1,6 +1,7 @@
 import { Express, Router } from "express";
 import fs from "fs";
 import path from "path";
+import logger from "./logger";
 
 interface RouteMeta {
   path: string;
@@ -93,7 +94,7 @@ export function registerRoutes(
                 apiRouter.use(`/${routePath}`, router);
 
                 if (verbose) {
-                  console.log(`✅ Registered route: ${routePath} from ${item}`);
+                  logger.info(`✅ Registered route: ${routePath} from ${item}`);
                 }
 
                 // Track routes from this router for logging
@@ -150,20 +151,18 @@ export function registerRoutes(
                   });
                 }
               } else {
-                console.warn(
-                  `⚠️ ${item} doesn't export a valid Express router`
-                );
+                logger.warn(`⚠️ ${item} doesn't export a valid Express router`);
               }
             } catch (error) {
-              console.error(`❌ Error registering routes from ${item}:`, error);
+              logger.error(`❌ Error registering routes from ${item}:`, error);
             }
           }
         } catch (error) {
-          console.error(`Error accessing ${itemPath}:`, error);
+          logger.error(`Error accessing ${itemPath}:`, error);
         }
       }
     } catch (error) {
-      console.error(`Error reading directory ${dirPath}:`, error);
+      logger.error(`Error reading directory ${dirPath}:`, error);
     }
   }
 
@@ -172,8 +171,8 @@ export function registerRoutes(
 
   if (verbose) {
     // Log all registered routes
-    console.log("\n📋 Registered API Routes:");
-    console.log("==========================");
+    logger.info("\n📋 Registered API Routes:");
+    logger.info("==========================");
 
     // Sort routes by path for better readability
     const sortedRoutes = [...registeredRoutes].sort((a, b) =>
@@ -183,15 +182,15 @@ export function registerRoutes(
     // Log in table format
     sortedRoutes.forEach((route) => {
       const protectionMark = route.protected ? "🔒" : "🔓";
-      console.log(
-        `${route.method.padEnd(7)} ${protectionMark} ${route.fullPath.padEnd(
-          50
-        )} [${route.file}]`
-      );
+      // console.log(
+      //   `${route.method.padEnd(7)} ${protectionMark} ${route.fullPath.padEnd(
+      //     50
+      //   )} [${route.file}]`
+      // );
     });
 
-    console.log("==========================");
-    console.log(`Total routes: ${registeredRoutes.length}\n`);
+    // console.log("==========================");
+    logger.info(`Total routes: ${registeredRoutes.length}\n`);
   }
 
   // Return registered routes for programmatic use

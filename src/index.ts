@@ -12,7 +12,7 @@ dotenv.config({ path: ".env" });
 import { errorHandlerMiddleware } from "./middlewares/error.middleware";
 import { errorResponse } from "./utils/response-helper";
 import { globalSingleflightMiddleware } from "./middlewares/global-singleflight.middleware";
-import { registerRoutes, getRoutesAsJson } from "./utils/autoRouter";
+import { registerRoutes, getRoutesAsJson } from "./utils/auto-router";
 
 const app = express();
 const port = process.env.PORT || 3000;

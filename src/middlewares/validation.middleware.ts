@@ -30,14 +30,14 @@ export const validate = (validations: ValidationChain[]) => {
 
         // Throw a validation error that will be caught by the global error handler
         // This will return a response with statusCode: 422, errors: { field: message }
-        console.log(formattedErrors);
+        // console.log(formattedErrors);
 
         return next(new ValidationError("Validation failed", formattedErrors));
       }
 
       next();
     } catch (error) {
-      console.error("Validation error:", error);
+      // logger.error("Validation error:", error);
       throw new ValidationError("Validation processing failed");
     }
   };

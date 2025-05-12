@@ -1,0 +1,14 @@
+.git
+.gitignore
+.husky
+node_modules/
+dist/
+logs/
+*.log
+.env
+.env.*
+.DS_Store
+.vscode/
+coverage/
+temp/
+tmp/ 

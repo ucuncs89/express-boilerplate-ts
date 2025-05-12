@@ -10,11 +10,20 @@
     "migrate:rollback": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js migrate:rollback --knexfile src/config/knexfile.ts",
     "migrate:make": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js migrate:make --knexfile src/config/knexfile.ts",
     "seed": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js seed:run --knexfile src/config/knexfile.ts",
-    "seed:make": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js seed:make --knexfile src/config/knexfile.ts"
+    "seed:make": "cross-env NODE_PATH=./ ts-node ./node_modules/knex/bin/cli.js seed:make --knexfile src/config/knexfile.ts",
+    "prepare": "husky",
+    "lint": "eslint --fix \"src/**/*.{ts,tsx}\"",
+    "lint:staged": "lint-staged"
   },
   "author": "",
   "license": "ISC",
   "description": "",
+  "lint-staged": {
+    "*.{js,ts}": [
+      "pnpm lint",
+      "git add"
+    ]
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
@@ -38,8 +47,13 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.15.17",
     "@types/winston": "^2.4.4",
+    "@typescript-eslint/eslint-plugin": "^8.32.0",
+    "@typescript-eslint/parser": "^8.32.0",
     "cross-env": "^7.0.3",
+    "eslint": "^9.26.0",
+    "husky": "^9.1.7",
     "knex": "^3.1.0",
+    "lint-staged": "^16.0.0",
     "tsx": "^4.19.4"
   }
 }

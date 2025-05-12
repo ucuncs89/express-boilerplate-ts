@@ -1,5 +1,42 @@
 # Node.js Backend Application
 
+## Package Manager (pnpm)
+
+Proyek ini menggunakan pnpm sebagai package manager. Keuntungan menggunakan pnpm:
+
+- Lebih cepat dibandingkan npm
+- Efisien dalam penggunaan disk space
+- Instalasi dependensi yang konsisten
+
+### Instalasi pnpm
+
+```bash
+npm install -g pnpm
+```
+
+### Perintah Dasar
+
+```bash
+# Install dependencies
+pnpm install
+
+# Menjalankan aplikasi
+pnpm dev
+
+# Build aplikasi
+pnpm build
+
+# Menjalankan aplikasi production
+pnpm start
+```
+
+## Git Hooks dengan Husky
+
+Proyek ini menggunakan Husky untuk menjalankan script sebelum git commit dan push:
+
+- **pre-commit**: Menjalankan lint-staged untuk memeriksa kode yang akan di-commit
+- **pre-push**: Memastikan aplikasi dapat di-build dengan sukses sebelum push
+
 ## Logger Documentation
 
 Aplikasi ini menggunakan Winston untuk logging yang mendukung penggunaan berbagai format dan tipe data.

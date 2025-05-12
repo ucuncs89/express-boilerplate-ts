@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { errorResponse, successResponse } from "./response-helper";
 import { ValidationError } from "./errors";
+import logger from "./logger";
 
 /**
  * Type for async Express route handlers that return data directly
@@ -29,16 +30,16 @@ export const controller = (
     next: NextFunction
   ): Promise<void> => {
     try {
-      console.log(`[Controller] Starting ${req.method} ${req.path}`);
+      logger.info(`[Controller] Starting ${req.method} ${req.path}`);
 
       // Execute the controller function and get the result
       const result = await fn(req, res, next);
 
-      console.log(`[Controller] Completed ${req.method} ${req.path}`);
+      // logger.info(`[Controller] Completed ${req.method} ${req.path}`);
 
       // If headers are already sent (e.g., by streaming response or manual handling), do nothing
       if (res.headersSent) {
-        console.log(
+        logger.info(
           `[Controller] Headers already sent for ${req.method} ${req.path}`
         );
         return;
@@ -60,21 +61,21 @@ export const controller = (
         const responseData =
           result?.result !== undefined ? result.result : result;
 
-        console.log(
+        logger.info(
           `[Controller] Sending success response for ${req.method} ${req.path} with status ${statusCode}`
         );
 
         // Send the success response
         successResponse(res, responseData, message, statusCode, pagination);
       } else {
-        console.log(
+        logger.info(
           `[Controller] No response data for ${req.method} ${req.path}`
         );
       }
       // If no result and headers not sent, assume it was handled manually or needs no response
     } catch (error: any) {
       // Log the error with request details
-      console.error(`[Controller Error] ${req.method} ${req.path}:`, {
+      logger.error(`[Controller Error] ${req.method} ${req.path}:`, {
         error: error.message,
         stack: error.stack,
         body: req.body,
@@ -84,7 +85,7 @@ export const controller = (
 
       // If headers are already sent, pass to next error handler
       if (res.headersSent) {
-        console.log(
+        logger.info(
           `[Controller] Headers already sent in error for ${req.method} ${req.path}`
         );
         return next(error);
@@ -98,7 +99,7 @@ export const controller = (
 
       // For validation errors, format them correctly
       if (error instanceof ValidationError || statusCode === 422) {
-        console.log(
+        logger.info(
           `[Controller] Sending validation error response for ${req.method} ${req.path}`
         );
         errorResponse(res, message, statusCode, { errors: error.errors });
@@ -114,7 +115,7 @@ export const controller = (
               name: error.name,
             };
 
-      console.log(
+      logger.info(
         `[Controller] Sending error response for ${req.method} ${req.path} with status ${statusCode}`
       );
 
