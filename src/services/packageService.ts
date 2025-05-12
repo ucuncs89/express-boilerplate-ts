@@ -1,5 +1,5 @@
 import { packageRepository, branchRepository } from "../repositories";
-import { Package } from "../repositories/interfaces";
+import { Package } from "../lib/interfaces";
 import { NotFoundError, BadRequestError } from "../utils/errors";
 import logger from "../utils/logger";
 import db from "../lib/db";

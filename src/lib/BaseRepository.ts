@@ -1,5 +1,5 @@
 import { Knex } from "knex";
-import db from "../lib/db";
+import db from "./db";
 import logger from "../utils/logger";
 
 /**

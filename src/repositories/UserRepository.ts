@@ -1,5 +1,5 @@
-import BaseRepository from "./BaseRepository";
-import { User } from "./interfaces";
+import BaseRepository from "../lib/BaseRepository";
+import { User } from "../lib/interfaces";
 import { NotFoundError } from "../utils/errors";
 
 export default class UserRepository extends BaseRepository<User> {

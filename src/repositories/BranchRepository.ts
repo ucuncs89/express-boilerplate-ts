@@ -1,5 +1,5 @@
-import BaseRepository from "./BaseRepository";
-import { Branch } from "./interfaces";
+import BaseRepository from "../lib/BaseRepository";
+import { Branch } from "../lib/interfaces";
 
 export default class BranchRepository extends BaseRepository<Branch> {
   constructor() {

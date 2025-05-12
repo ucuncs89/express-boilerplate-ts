@@ -1,5 +1,5 @@
-import BaseRepository from "./BaseRepository";
-import { Role } from "./interfaces";
+import BaseRepository from "../lib/BaseRepository";
+import { Role } from "../lib/interfaces";
 
 export default class RoleRepository extends BaseRepository<Role> {
   constructor() {

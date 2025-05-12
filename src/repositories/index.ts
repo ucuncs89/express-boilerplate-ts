@@ -4,7 +4,7 @@ import BranchRepository from "./BranchRepository";
 import PackageRepository from "./PackageRepository";
 
 // Export interfaces
-export * from "./interfaces";
+export * from "../lib/interfaces";
 
 // Export repositories
 export { UserRepository, RoleRepository, BranchRepository, PackageRepository };

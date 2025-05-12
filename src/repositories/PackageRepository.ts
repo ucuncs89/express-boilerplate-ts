@@ -1,5 +1,5 @@
-import BaseRepository from "./BaseRepository";
-import { Package } from "./interfaces";
+import BaseRepository from "../lib/BaseRepository";
+import { Package } from "../lib/interfaces";
 import { NotFoundError } from "../utils/errors";
 
 export default class PackageRepository extends BaseRepository<Package> {
